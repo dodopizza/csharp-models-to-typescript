@@ -9,7 +9,7 @@ This is a tool that consumes your C# domain models and types and creates TypeScr
 ## Install
 
 ```
-Add in your package.json file in devDependencies section "csharp-models-to-typescript": "https://github.com/ajupov/csharp-models-to-typescript.git",
+Add in your package.json file in devDependencies section "csharp-models-to-typescript": "https://github.com/dodopizza/csharp-models-to-typescript.git",
 ```
 
 ## How to use
