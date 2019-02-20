@@ -2,16 +2,14 @@
 
 This is a tool that consumes your C# domain models and types and creates TypeScript declaration files from them. There's other tools that does this but what makes this one different is that it internally uses [Roslyn (the .NET compiler platform)](https://github.com/dotnet/roslyn) to parse the source files, which removes the need to create and maintain our own parser.
 
-
 ## Dependencies
 
-* [.NET Core SDK](https://www.microsoft.com/net/download/macos)
-
+- [.NET Core SDK](https://www.microsoft.com/net/download/macos)
 
 ## Install
 
 ```
-$ npm install --save csharp-models-to-typescript
+Add in your package.json file in devDependencies section "csharp-models-to-typescript": "https://github.com/ajupov/csharp-models-to-typescript.git",
 ```
 
 ## How to use
@@ -27,10 +25,8 @@ $ npm install --save csharp-models-to-typescript
     "exclude": [
         "./models/foo/bar.cs"
     ],
-    "namespace": "Api",
-    "output": "./api.d.ts",
+    "output": "./Contracts.ts",
     "camelCase": false,
-    "stringLiteralTypesInsteadOfEnums": false,
     "customTypeTranslations": {
         "ProductName": "string",
         "ProductNumber": "string"
@@ -47,7 +43,6 @@ $ npm install --save csharp-models-to-typescript
 ```
 
 3. Run the npm script `generate-types` and the output file specified in your config should be created and populated with your models.
-
 
 ## License
 

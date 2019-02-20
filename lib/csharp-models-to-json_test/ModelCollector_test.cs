@@ -1,4 +1,5 @@
 using System.Linq;
+using CSharpModelsToJson.ModelInspection;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using NUnit.Framework;
@@ -12,6 +13,7 @@ namespace CSharpModelsToJson.Tests
         public void BasicInheritance_ReturnsInheritedClass()
         {
             const string baseClasses = "B, C, D";
+
             var tree = CSharpSyntaxTree.ParseText(@"
                 public class A : B, C, D
                 {
@@ -21,7 +23,7 @@ namespace CSharpModelsToJson.Tests
                 }"
             );
 
-            var root = (CompilationUnitSyntax)tree.GetRoot();
+            var root = (CompilationUnitSyntax) tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
@@ -63,7 +65,7 @@ namespace CSharpModelsToJson.Tests
                 }"
             );
 
-            var root = (CompilationUnitSyntax)tree.GetRoot();
+            var root = (CompilationUnitSyntax) tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             modelCollector.Visit(root);
@@ -78,6 +80,7 @@ namespace CSharpModelsToJson.Tests
         public void TypedInheritance_ReturnsInheritance()
         {
             const string baseClasses = "IController<Controller>";
+            
             var tree = CSharpSyntaxTree.ParseText(@"
                 public class A : IController<Controller>
                 {
@@ -87,7 +90,7 @@ namespace CSharpModelsToJson.Tests
                 }"
             );
 
-            var root = (CompilationUnitSyntax)tree.GetRoot();
+            var root = (CompilationUnitSyntax) tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
@@ -115,7 +118,7 @@ namespace CSharpModelsToJson.Tests
                 }"
             );
 
-            var root = (CompilationUnitSyntax)tree.GetRoot();
+            var root = (CompilationUnitSyntax) tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());

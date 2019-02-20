@@ -1,5 +1,10 @@
+using System;
 using System.Collections.Generic;
-using Microsoft.CodeAnalysis;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization.Json;
+using CSharpModelsToJson.EnumInspection;
+using CSharpModelsToJson.ModelInspection;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
@@ -8,78 +13,73 @@ using Ganss.IO;
 
 namespace CSharpModelsToJson
 {
-    class File
+    public class Program
     {
-        public string FileName { get; set; }
-        public IEnumerable<Model> Models { get; set; }
-        public IEnumerable<Enum> Enums { get; set; }
-    }
-
-    class Program
-    {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            IConfiguration config = new ConfigurationBuilder()
+            var config = new ConfigurationBuilder()
                 .AddJsonFile(args[0], true, true)
                 .Build();
 
-            List<string> includes = new List<string>();
-            List<string> excludes = new List<string>();
+            var includes = new List<string>();
+            var excludes = new List<string>();
 
             config.Bind("include", includes);
             config.Bind("exclude", excludes);
 
-            List<File> files = new List<File>();
-
-            foreach (string fileName in getFileNames(includes, excludes)) {
-                files.Add(parseFile(fileName));
-            }
-
-            string json = JsonConvert.SerializeObject(files);
-            System.Console.WriteLine(json);
+            var files = GetFileNames(includes, excludes).Select(ParseFile);
+            var json = JsonConvert.SerializeObject(files);
+            
+            Console.WriteLine(json);
         }
 
-        static List<string> getFileNames(List<string> includes, List<string> excludes) {
-            List<string> fileNames = new List<string>();
+        private static IEnumerable<string> GetFileNames(IEnumerable<string> includes, IEnumerable<string> excludes)
+        {
+            var fileNames = new List<string>();
 
-            foreach (var path in expandGlobPatterns(includes)) {
+            foreach (var path in ExpandGlobPatterns(includes))
+            {
                 fileNames.Add(path);
             }
 
-            foreach (var path in expandGlobPatterns(excludes)) {
+            foreach (var path in ExpandGlobPatterns(excludes))
+            {
                 fileNames.Remove(path);
             }
 
             return fileNames;
         }
 
-        static List<string> expandGlobPatterns(List<string> globPatterns) {
-            List<string> fileNames = new List<string>();
+        private static IEnumerable<string> ExpandGlobPatterns(IEnumerable<string> globPatterns)
+        {
+            var glob = new Glob();
+            var fileNames = new List<string>();
 
-            foreach (string pattern in globPatterns) {
-                var paths = Glob.Expand(pattern);
+            foreach (var pattern in globPatterns)
+            {
+                var paths = glob.Expand(pattern);
 
-                foreach (var path in paths) {
-                    fileNames.Add(path.FullName);
-                }
+                fileNames.AddRange(paths.Select(path => path.FullName));
             }
 
             return fileNames;
         }
 
-        static File parseFile(string path) {
-            string source = System.IO.File.ReadAllText(path);
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(source);
+        private static FileMetaInfo ParseFile(string path)
+        {
+            var source = File.ReadAllText(path);
+            var tree = CSharpSyntaxTree.ParseText(source);
             var root = (CompilationUnitSyntax) tree.GetRoot();
- 
+
             var modelCollector = new ModelCollector();
             var enumCollector = new EnumCollector();
 
             modelCollector.Visit(root);
             enumCollector.Visit(root);
 
-            return new File() {
-                FileName = System.IO.Path.GetFullPath(path),
+            return new FileMetaInfo
+            {
+                FileName = Path.GetFullPath(path),
                 Models = modelCollector.Models,
                 Enums = enumCollector.Enums
             };
