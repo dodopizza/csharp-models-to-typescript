@@ -1,25 +1,25 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
-const process = require("process");
-const path = require("path");
-const { exec } = require("child_process");
+const fs = require('fs');
+const process = require('process');
+const path = require('path');
+const { exec } = require('child_process');
 
-const createConverter = require("./converter");
+const createConverter = require('./converter');
 
-const configArg = process.argv.find(x => x.startsWith("--config="));
+const configArg = process.argv.find(x => x.startsWith('--config='));
 
 if (!configArg) {
   return console.error(
-    "No configuration file for `csharp-models-to-typescript` provided."
+    'No configuration file for `csharp-models-to-typescript` provided.'
   );
 }
 
-const configPath = configArg.substr("--config=".length);
+const configPath = configArg.substr('--config='.length);
 let config;
 
 try {
-  unparsedConfig = fs.readFileSync(configPath, "utf8");
+  unparsedConfig = fs.readFileSync(configPath, 'utf8');
 } catch (error) {
   return console.error(`Configuration file "${configPath}" not found.`);
 }
@@ -32,14 +32,15 @@ try {
   );
 }
 
-const output = config.output || "types.json";
+const output = config.output || 'types.json';
 
 const converter = createConverter({
   customTypeTranslations: config.customTypeTranslations || {},
-  camelCase: config.camelCase || false
+  camelCase: config.camelCase || false,
+  ignoreBaseTypes: config.ignoreBaseTypes || []
 });
 
-const dotnetProject = path.join(__dirname, "lib/csharp-models-to-json");
+const dotnetProject = path.join(__dirname, 'lib/csharp-models-to-json');
 
 let timer = process.hrtime();
 
@@ -56,7 +57,7 @@ exec(
       json = JSON.parse(stdout);
     } catch (error) {
       return console.error(
-        "The output from `csharp-models-to-json` contains invalid JSON."
+        'The output from `csharp-models-to-json` contains invalid JSON.'
       );
     }
 
@@ -68,7 +69,7 @@ exec(
       }
 
       timer = process.hrtime(timer);
-      console.log("Done in %d.%d seconds.", timer[0], timer[1]);
+      console.log('Done in %d.%d seconds.', timer[0], timer[1]);
     });
   }
 );

@@ -30,7 +30,8 @@ Add in your package.json file in devDependencies section "csharp-models-to-types
     "customTypeTranslations": {
         "ProductName": "string",
         "ProductNumber": "string"
-    }
+    },
+    "ignoreBaseTypes": ["IComparable<Product>"]
 }
 ```
 

@@ -1,4 +1,4 @@
-const path = require("path");
+const path = require('path');
 
 const flatten = arr => arr.reduce((a, b) => a.concat(b), []);
 
@@ -6,20 +6,20 @@ const collectionRegex = /^(?:I?List|IReadOnlyList|IEnumerable|ICollection|HashSe
 const dictionaryRegex = /^I?Dictionary<([\w\d]+),\s?([\w\d]+)>\?*$/;
 
 const defaultTypeTranslations = {
-  int: "number",
-  double: "number",
-  float: "number",
-  Int32: "number",
-  Int64: "number",
-  short: "number",
-  long: "number",
-  decimal: "number",
-  bool: "boolean",
-  DateTime: "string",
-  DateTimeOffset: "string",
-  Guid: "string",
-  dynamic: "any",
-  object: "any"
+  int: 'number',
+  double: 'number',
+  float: 'number',
+  Int32: 'number',
+  Int64: 'number',
+  short: 'number',
+  long: 'number',
+  decimal: 'number',
+  bool: 'boolean',
+  DateTime: 'string',
+  DateTimeOffset: 'string',
+  Guid: 'string',
+  dynamic: 'any',
+  object: 'any'
 };
 
 const createConverter = config => {
@@ -36,23 +36,44 @@ const createConverter = config => {
       return flatten([
         ...file.Models.map(model => convertModel(model)),
         ...file.Enums.map(enum_ => convertEnum(enum_, filename))
-      ]).join("\n");
+      ]).join('\n');
     });
 
     const filteredContent = content.filter(x => x.length > 0);
 
-    return filteredContent.join("\n");
+    return filteredContent.join('\n');
   };
 
   const convertModel = model => {
     const rows = [];
     const members = [...model.Fields, ...model.Properties];
-    const baseClasses = model.BaseClasses
+
+    let baseClasses = '';
+
+    if (!config.ignoreBaseTypes) {
+      baseClasses = model.BaseClasses;
+    } else {
+      if (model.BaseClasses) {
+        let resultBaseClasses = [];
+
+        for (const value of model.BaseClasses.split(',')) {
+          const baseClass = value.trim();
+
+          if (!config.ignoreBaseTypes.includes(baseClass)) {
+            resultBaseClasses.push(baseClass);
+          }
+        }
+
+        baseClasses = resultBaseClasses.join(', ');
+      }
+    }
+
+    const resultBaseClasses = baseClasses
       ? ` extends ${model.BaseClasses}`
-      : "";
+      : '';
 
     if (members.length > 0) {
-      rows.push(`export interface ${model.ModelName}${baseClasses} {`);
+      rows.push(`export interface ${model.ModelName}${resultBaseClasses} {`);
       members.forEach(member => {
         rows.push(convertProperty(member));
       });
@@ -78,13 +99,13 @@ const createConverter = config => {
   };
 
   const convertProperty = property => {
-    const optional = property.Type.endsWith("?");
+    const optional = property.Type.endsWith('?');
     const collection = property.Type.match(collectionRegex);
     const dictionary = property.Type.match(dictionaryRegex);
     const identifier = convertIdentifier(
       optional
-        ? `${property.Identifier.split(" ")[0]}?`
-        : property.Identifier.split(" ")[0]
+        ? `${property.Identifier.split(' ')[0]}?`
+        : property.Identifier.split(' ')[0]
     );
 
     let type;
