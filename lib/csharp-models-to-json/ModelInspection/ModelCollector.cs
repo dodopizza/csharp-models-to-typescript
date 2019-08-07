@@ -33,7 +33,7 @@ namespace CSharpModelsToJson.ModelInspection
                     .Where(field => IsAccessible(field.Modifiers))
                     .Select(ConvertField),
                 Properties = node.Members.OfType<PropertyDeclarationSyntax>()
-                    .Where(property => IsAccessible(property) && IsAccessible(property.Modifiers))
+                    .Where(property => IsAccessible(property.Modifiers))
                     .Select(ConvertProperty),
                 BaseClasses = node.BaseList?.Types.ToString()
             };
@@ -46,11 +46,6 @@ namespace CSharpModelsToJson.ModelInspection
                 modifier.ToString() != "static" &&
                 modifier.ToString() != "private"
             );
-        }
-
-        private static bool IsAccessible(BasePropertyDeclarationSyntax property)
-        {
-            return property.AccessorList?.Accessors.Count == 2;
         }
 
         private static FieldInfo ConvertField(FieldDeclarationSyntax field)
