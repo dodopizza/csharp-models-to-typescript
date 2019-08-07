@@ -50,7 +50,7 @@ namespace CSharpModelsToJson.ModelInspection
 
         private static bool IsAccessible(BasePropertyDeclarationSyntax property)
         {
-            return property.AccessorList.Accessors.Count == 2;
+            return property.AccessorList?.Accessors.Count == 2;
         }
 
         private static FieldInfo ConvertField(FieldDeclarationSyntax field)

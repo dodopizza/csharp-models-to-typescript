@@ -138,6 +138,8 @@ namespace CSharpModelsToJson.Tests
                     {
                         public string A { get; }
 
+                        public bool B => true;
+
                         public string Included { get; set }
                     }
                 }"
