@@ -29,7 +29,7 @@ namespace CSharpModelsToJson.Tests
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
 
             Assert.IsNotNull(modelCollector.Models);
-            Assert.AreEqual(modelCollector.Models.First().BaseClasses, baseClasses);
+            Assert.AreEqual(baseClasses, modelCollector.Models.First().BaseClasses);
         }
 
         [Test]
@@ -71,8 +71,8 @@ namespace CSharpModelsToJson.Tests
             modelCollector.Visit(root);
 
             Assert.IsNotNull(modelCollector.Models);
-            Assert.AreEqual(modelCollector.Models.Count, 3);
-            Assert.AreEqual(modelCollector.Models.First().Properties.Count(), 3);
+            Assert.AreEqual(3, modelCollector.Models.Count);
+            Assert.AreEqual(3, modelCollector.Models.First().Properties.Count());
         }
 
 
@@ -96,7 +96,7 @@ namespace CSharpModelsToJson.Tests
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
 
             Assert.IsNotNull(modelCollector.Models);
-            Assert.AreEqual(modelCollector.Models.First().BaseClasses, baseClasses);
+            Assert.AreEqual(baseClasses, modelCollector.Models.First().BaseClasses);
         }
 
         [Test]
@@ -125,7 +125,61 @@ namespace CSharpModelsToJson.Tests
 
             Assert.IsNotNull(modelCollector.Models);
             Assert.IsNotNull(modelCollector.Models.First().Properties);
-            Assert.AreEqual(modelCollector.Models.First().Properties.Count(), 1);
+            Assert.AreEqual(1, modelCollector.Models.First().Properties.Count());
+        }
+
+        [Test]
+        public void AccessibilityRespected_ReturnsFullPropertiesOnly()
+        {
+            var tree = CSharpSyntaxTree.ParseText(@"
+                public class A : IController<Controller>
+                {
+                    public void AMember()
+                    {
+                        public string A { get; }
+
+                        public string Included { get; set }
+                    }
+                }"
+            );
+
+            var root = (CompilationUnitSyntax) tree.GetRoot();
+
+            var modelCollector = new ModelCollector();
+            modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
+
+            Assert.IsNotNull(modelCollector.Models);
+            Assert.IsNotNull(modelCollector.Models.First().Properties);
+            Assert.AreEqual(1, modelCollector.Models.First().Properties.Count());
+        }
+
+        [Test]
+        public void SyntaxSupport_ReturnsLambdaProperties()
+        {
+            var tree = CSharpSyntaxTree.ParseText(@"
+                public class A : IController<Controller>
+                {
+                    public void AMember()
+                    {
+                        private bool _included;
+
+                        public bool Included
+                        {
+                            get => _included;
+                            set => _included = value;
+                        }
+                    }
+                }"
+            );
+
+            var root = (CompilationUnitSyntax) tree.GetRoot();
+
+            var modelCollector = new ModelCollector();
+            modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
+
+            Assert.IsNotNull(modelCollector.Models);
+            Assert.IsNotNull(modelCollector.Models.First().Properties);
+            Assert.AreEqual(1, modelCollector.Models.First().Properties.Count());
         }
     }
 }
