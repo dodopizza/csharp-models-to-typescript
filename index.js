@@ -48,7 +48,8 @@ exec(
   `dotnet run --project "${dotnetProject}" "${path.resolve(configPath)}"`,
   (err, stdout) => {
     if (err) {
-      return console.error(err);
+      console.error(err);
+      process.exit(1);
     }
 
     let json;
@@ -56,9 +57,10 @@ exec(
     try {
       json = JSON.parse(stdout);
     } catch (error) {
-      return console.error(
+      console.error(
         'The output from `csharp-models-to-json` contains invalid JSON.'
       );
+			process.exit(1);
     }
 
     const types = converter(json);
