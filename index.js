@@ -41,11 +41,16 @@ const converter = createConverter({
 });
 
 const dotnetProject = path.join(__dirname, 'lib/csharp-models-to-json');
+const dotnetOutPath = path.join(dotnetProject, 'bin')
 
 let timer = process.hrtime();
 
+exec(`dotnet build -c Release "${dotnetProject}" -o "${dotnetOutPath}"`)
+
+const dotnetDll = path.join(dotnetOutPath, "csharp-models-to-json.dll")
+
 exec(
-  `dotnet run --project "${dotnetProject}" "${path.resolve(configPath)}"`,
+  `dotnet "${dotnetDll}" "${path.resolve(configPath)}"`,
   (err, stdout) => {
     if (err) {
       console.error(err);
