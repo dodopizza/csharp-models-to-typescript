@@ -47,8 +47,8 @@ let timer = process.hrtime();
 
 exec(`dotnet build -c Release "${dotnetProject}" -o "${dotnetOutPath}"`,
   (err, stdout) => {
+    console.log(stdout);
     if (err) {
-      console.error(stdout);
       console.error(err);
       process.exit(1);
     }
