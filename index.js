@@ -45,7 +45,15 @@ const dotnetOutPath = path.join(dotnetProject, 'bin')
 
 let timer = process.hrtime();
 
-exec(`dotnet build -c Release "${dotnetProject}" -o "${dotnetOutPath}"`)
+exec(`dotnet build -c Release "${dotnetProject}" -o "${dotnetOutPath}"`,
+  (err, stdout) => {
+    if (err) {
+      console.error(stdout);
+      console.error(err);
+      process.exit(1);
+    }
+  }
+);
 
 const dotnetDll = path.join(dotnetOutPath, "csharp-models-to-json.dll")
 
@@ -65,7 +73,7 @@ exec(
       console.error(
         'The output from `csharp-models-to-json` contains invalid JSON.'
       );
-			process.exit(1);
+      process.exit(1);
     }
 
     const types = converter(json);
