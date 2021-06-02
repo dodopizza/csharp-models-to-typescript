@@ -41,37 +41,59 @@ const converter = createConverter({
 });
 
 const dotnetProject = path.join(__dirname, 'lib/csharp-models-to-json');
+const dotnetOutPath = path.join(dotnetProject, 'bin')
 
 let timer = process.hrtime();
 
-exec(
-  `dotnet run --project "${dotnetProject}" "${path.resolve(configPath)}"`,
-  (err, stdout) => {
-    if (err) {
-      console.error(err);
-      process.exit(1);
-    }
+const dotnetDll = path.join(dotnetOutPath, "csharp-models-to-json.dll")
 
-    let json;
+function build_and_run()
+{
+    exec(`dotnet build -c Release "${dotnetProject}" -o "${dotnetOutPath}"`,
+    (err, stdout) => {
+        console.log(stdout);
+        if (err) {
+            console.error(err);
+            process.exit(1);
+        }
 
-    try {
-      json = JSON.parse(stdout);
-    } catch (error) {
-      console.error(
-        'The output from `csharp-models-to-json` contains invalid JSON.'
-      );
-			process.exit(1);
-    }
 
-    const types = converter(json);
-
-    fs.writeFile(output, types, err => {
-      if (err) {
-        return console.error(err);
-      }
-
-      timer = process.hrtime(timer);
-      console.log('Done in %d.%d seconds.', timer[0], timer[1]);
+        run();
     });
-  }
-);
+}
+
+function run()
+{
+    exec(
+        `dotnet "${dotnetDll}" "${path.resolve(configPath)}"`,
+        (err, stdout) => {
+            if (err) {
+            console.error(err);
+            process.exit(1);
+            }
+
+            let json;
+
+            try {
+            json = JSON.parse(stdout);
+            } catch (error) {
+            console.error(
+                'The output from `csharp-models-to-json` contains invalid JSON.'
+            );
+            process.exit(1);
+            }
+
+            const types = converter(json);
+
+            fs.writeFile(output, types, err => {
+            if (err) {
+                return console.error(err);
+            }
+
+            timer = process.hrtime(timer);
+            console.log('Done in %d.%d seconds.', timer[0], timer[1]);
+            });
+        });
+}
+
+build_and_run();
