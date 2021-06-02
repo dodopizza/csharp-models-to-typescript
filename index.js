@@ -6,8 +6,6 @@ const path = require('path');
 const { exec } = require('child_process');
 
 const createConverter = require('./converter');
-const { builtinModules } = require('module');
-const { runInContext } = require('vm');
 
 const configArg = process.argv.find(x => x.startsWith('--config='));
 
