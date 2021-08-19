@@ -134,23 +134,30 @@ namespace CSharpModelsToJson.Tests
             var tree = CSharpSyntaxTree.ParseText(@"
                 public class A
                 {
-                    public int NonObsoleteField { get; set; }
+                    public int NonObsoleteProperty { get; set; }
 
                     [Obsolete]
-                    public int ObsoleteField { get; set; }
+                    public int ObsoleteProperty { get; set; }
+
+                    [Obsolete]
+                    public int ObsoleteField;
                 }"
             );
-            
+
             var root = (CompilationUnitSyntax)tree.GetRoot();
             var modelCollector = new ModelCollector();
             modelCollector.Visit(root);
             var modelProperties = modelCollector.Models.Single().Properties.ToArray();
-            
-            Assert.That(modelProperties[0].Identifier, Is.EqualTo("NonObsoleteField"));
+            var modelFields = modelCollector.Models.Single().Fields.ToArray();
+
+            Assert.That(modelProperties[0].Identifier, Is.EqualTo("NonObsoleteProperty"));
             Assert.That(modelProperties[0].IsObsolete, Is.False);
-            
-            Assert.That(modelProperties[1].Identifier, Is.EqualTo("ObsoleteField"));
+
+            Assert.That(modelProperties[1].Identifier, Is.EqualTo("ObsoleteProperty"));
             Assert.That(modelProperties[1].IsObsolete, Is.True);
+
+            Assert.That(modelFields[0].Identifier, Is.EqualTo("ObsoleteField"));
+            Assert.That(modelFields[0].IsObsolete, Is.True);
         }
     }
 }

@@ -5,5 +5,7 @@ namespace CSharpModelsToJson.ModelInspection
         public string Identifier { get; set; }
 
         public string Type { get; set; }
+
+        public bool IsObsolete { get; set; }
     }
 }
