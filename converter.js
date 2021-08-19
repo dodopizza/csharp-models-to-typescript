@@ -124,7 +124,9 @@ const createConverter = config => {
       );
     }
 
-    return `\t${identifier}: ${type}`;
+    const deprecationMark = property.IsObsolete ? `\t/** @deprecated */\n` : ``
+
+    return `${deprecationMark}\t${identifier}: ${type}`;
   };
 
   const convertIdentifier = identifier =>

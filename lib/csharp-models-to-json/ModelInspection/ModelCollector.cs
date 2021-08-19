@@ -54,6 +54,7 @@ namespace CSharpModelsToJson.ModelInspection
             {
                 Identifier = field.Declaration.Variables.First().GetText().ToString(),
                 Type = field.Declaration.Type.ToString(),
+                IsObsolete = field.AttributeLists.Any(IsObsolete),
             };
         }
 
@@ -63,7 +64,11 @@ namespace CSharpModelsToJson.ModelInspection
             {
                 Identifier = property.Identifier.ToString(),
                 Type = property.Type.ToString(),
+                IsObsolete = property.AttributeLists.Any(IsObsolete),
             };
         }
+
+        private static bool IsObsolete(AttributeListSyntax a) =>
+            a.Attributes.SingleOrDefault()?.Name.ToString() == "Obsolete";
     }
 }

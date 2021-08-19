@@ -23,7 +23,7 @@ namespace CSharpModelsToJson.Tests
                 }"
             );
 
-            var root = (CompilationUnitSyntax) tree.GetRoot();
+            var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
@@ -65,7 +65,7 @@ namespace CSharpModelsToJson.Tests
                 }"
             );
 
-            var root = (CompilationUnitSyntax) tree.GetRoot();
+            var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             modelCollector.Visit(root);
@@ -80,7 +80,7 @@ namespace CSharpModelsToJson.Tests
         public void TypedInheritance_ReturnsInheritance()
         {
             const string baseClasses = "IController<Controller>";
-            
+
             var tree = CSharpSyntaxTree.ParseText(@"
                 public class A : IController<Controller>
                 {
@@ -90,7 +90,7 @@ namespace CSharpModelsToJson.Tests
                 }"
             );
 
-            var root = (CompilationUnitSyntax) tree.GetRoot();
+            var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
@@ -118,7 +118,7 @@ namespace CSharpModelsToJson.Tests
                 }"
             );
 
-            var root = (CompilationUnitSyntax) tree.GetRoot();
+            var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             modelCollector.VisitClassDeclaration(root.DescendantNodes().OfType<ClassDeclarationSyntax>().First());
@@ -126,6 +126,38 @@ namespace CSharpModelsToJson.Tests
             Assert.IsNotNull(modelCollector.Models);
             Assert.IsNotNull(modelCollector.Models.First().Properties);
             Assert.AreEqual(modelCollector.Models.First().Properties.Count(), 1);
+        }
+
+        [Test]
+        public void ObsoleteFields_ShouldBeMarkedObsolete()
+        {
+            var tree = CSharpSyntaxTree.ParseText(@"
+                public class A
+                {
+                    public int NonObsoleteProperty { get; set; }
+
+                    [Obsolete]
+                    public int ObsoleteProperty { get; set; }
+
+                    [Obsolete]
+                    public int ObsoleteField;
+                }"
+            );
+
+            var root = (CompilationUnitSyntax)tree.GetRoot();
+            var modelCollector = new ModelCollector();
+            modelCollector.Visit(root);
+            var modelProperties = modelCollector.Models.Single().Properties.ToArray();
+            var modelFields = modelCollector.Models.Single().Fields.ToArray();
+
+            Assert.That(modelProperties[0].Identifier, Is.EqualTo("NonObsoleteProperty"));
+            Assert.That(modelProperties[0].IsObsolete, Is.False);
+
+            Assert.That(modelProperties[1].Identifier, Is.EqualTo("ObsoleteProperty"));
+            Assert.That(modelProperties[1].IsObsolete, Is.True);
+
+            Assert.That(modelFields[0].Identifier, Is.EqualTo("ObsoleteField"));
+            Assert.That(modelFields[0].IsObsolete, Is.True);
         }
     }
 }
