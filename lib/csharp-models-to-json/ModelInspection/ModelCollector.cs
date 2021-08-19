@@ -63,7 +63,10 @@ namespace CSharpModelsToJson.ModelInspection
             {
                 Identifier = property.Identifier.ToString(),
                 Type = property.Type.ToString(),
+                IsObsolete = property.AttributeLists.Any(IsObsolete)
             };
         }
+
+        private static bool IsObsolete(AttributeListSyntax a) => a.Attributes.SingleOrDefault()?.Name.ToString() == "Obsolete";
     }
 }
