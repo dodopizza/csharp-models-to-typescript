@@ -2,14 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Json;
 using CSharpModelsToJson.EnumInspection;
 using CSharpModelsToJson.ModelInspection;
+using Ganss.IO;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
-using Ganss.IO;
 
 namespace CSharpModelsToJson
 {
@@ -17,15 +15,10 @@ namespace CSharpModelsToJson
     {
         public static void Main(string[] args)
         {
-            var config = new ConfigurationBuilder()
-                .AddJsonFile(args[0], true, true)
-                .Build();
+            var config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(args[0]));
 
-            var includes = new List<string>();
-            var excludes = new List<string>();
-
-            config.Bind("include", includes);
-            config.Bind("exclude", excludes);
+            var includes = config.Include;
+            var excludes = config.Exclude;
 
             var files = GetFileNames(includes, excludes).Select(ParseFile);
             var json = JsonConvert.SerializeObject(files);
@@ -69,7 +62,7 @@ namespace CSharpModelsToJson
         {
             var source = File.ReadAllText(path);
             var tree = CSharpSyntaxTree.ParseText(source);
-            var root = (CompilationUnitSyntax) tree.GetRoot();
+            var root = (CompilationUnitSyntax)tree.GetRoot();
 
             var modelCollector = new ModelCollector();
             var enumCollector = new EnumCollector();
