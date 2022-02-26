@@ -17,8 +17,8 @@ namespace CSharpModelsToJson
         {
             var config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(args[0]));
 
-            var includes = config.Include;
-            var excludes = config.Exclude;
+            var includes = config.Include ?? Enumerable.Empty<string>();
+            var excludes = config.Exclude ?? Enumerable.Empty<string>();
 
             var files = GetFileNames(includes, excludes).Select(ParseFile);
             var json = JsonConvert.SerializeObject(files);
