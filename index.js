@@ -8,6 +8,7 @@ const { exec } = require('child_process');
 const createConverter = require('./converter');
 
 const configArg = process.argv.find(x => x.startsWith('--config='));
+const executableArg = process.argv.find(x => x.startsWith('--exec='));
 
 if (!configArg) {
   return console.error(
@@ -46,6 +47,9 @@ const dotnetOutPath = path.join(dotnetProject, 'bin')
 let timer = process.hrtime();
 
 const dotnetDll = path.join(dotnetOutPath, "csharp-models-to-json.dll")
+const executable = executableArg
+    ? executableArg.substring('--exec='.length)
+    : `dotnet "${dotnetDll}"`;
 
 function build_and_run()
 {
@@ -65,7 +69,7 @@ function build_and_run()
 function run()
 {
     exec(
-        `dotnet "${dotnetDll}" "${path.resolve(configPath)}"`,
+        `${executable} "${path.resolve(configPath)}"`,
         (err, stdout) => {
             if (err) {
             console.error(err);
@@ -96,4 +100,8 @@ function run()
         });
 }
 
-build_and_run();
+if (executableArg) {
+  run();
+} else {
+  build_and_run();
+}
