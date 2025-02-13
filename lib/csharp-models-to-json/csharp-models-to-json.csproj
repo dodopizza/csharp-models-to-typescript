@@ -8,7 +8,7 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>csharp-models-to-json</ToolCommandName>
         <PackageId>Dodo.CSharpModelsToJson</PackageId>
-        <Version>1.1.0</Version>
+        <Version>1.0.0</Version>
         <Company>dodopizza</Company>
         <PackageDescription>C# Models to json</PackageDescription>
         <RepositoryUrl>https://github.com/dodopizza/csharp-models-to-typescript</RepositoryUrl>
